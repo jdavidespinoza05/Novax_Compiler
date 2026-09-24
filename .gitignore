@@ -1,0 +1,19 @@
+# NetBeans / Ant
+/nbproject/private/
+/build/
+/dist/
+/nbbuild/
+/nbdist/
+nbactions.xml
+
+# Compilados
+*.class
+
+# Backups de editor
+*~
+
+# Archivos temporales del scanner
+archivo.txt
+
+# Misc
+.write_test
