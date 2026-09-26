@@ -5,7 +5,7 @@ import static codigo.Tokens.*;
 %type Tokens
 L=[a-zA-Z_]+
 D=[0-9]+
-espacio=[ ,\t,\r,\n]+
+espacio=[ \t\r\n]+
 %{
     public String lexeme;
 %}
@@ -62,11 +62,13 @@ espacio=[ ,\t,\r,\n]+
 "." {lexeme=yytext(); return SEPARADORES;}
 {L}({L}|{D})* {lexeme=yytext(); return IDENTIFICADORES;}
 
-"[^\n]*" {lexeme=yytext(); return LITERALES_STRINGS;}
+{espacio} {/* ignorar línea */}
+
+\"[^\"\n]*\" {lexeme=yytext(); return LITERALES_STRINGS;}
 0[0-7]+                 {lexeme=yytext(); return LITERALES_OCTALES;}
 0[xX][0-9a-fA-F]+       {lexeme=yytext(); return LITERALES_HEXADECIMALES;}
--?{D}+"."{D}+           {lexeme=yytext(); return LITERALES_FLOTANTES;}
--?{D}+                  {lexeme=yytext(); return LITERALES_NUMEROS;}
+{D}+"."{D}+             {lexeme=yytext(); return LITERALES_FLOTANTES;}
+{D}+                    {lexeme=yytext(); return LITERALES_NUMEROS;}
 
 
 "//"[^\r\n]* {/*Ignorar linea*/}           
@@ -74,4 +76,3 @@ espacio=[ ,\t,\r,\n]+
 "/*"([^*]|\*+[^*/])*\*+"/" {/*Ignorar bloque*/}
 
  . {return ERRORES;}
-
