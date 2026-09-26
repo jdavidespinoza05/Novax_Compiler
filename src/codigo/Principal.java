@@ -23,14 +23,10 @@ public static void main(String[] args) {
 }
     
     public static void generarLexer(String ruta){
-        //File archivo = new File(ruta);
-        
-        
         try {
             jflex.Main.generate(new String[]{ruta});
         } catch (jflex.exceptions.SilentExit e) {
-            // SilentExit significa "salida silenciosa", normalmente no es un error real
-            e.printStackTrace(); // O simplemente dejarlo vacío
+            e.printStackTrace(); 
         }
     }
 }

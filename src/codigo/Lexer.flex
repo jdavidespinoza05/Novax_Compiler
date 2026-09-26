@@ -3,11 +3,13 @@ import static codigo.Tokens.*;
 %%
 %class Lexer
 %type Tokens
-L=[a-zA-Z_]+
+%line
+L=[a-zA-Z]+
 D=[0-9]+
 espacio=[ \t\r\n]+
 %{
     public String lexeme;
+    public int line;
 %}
 %%
 "main" |
@@ -33,9 +35,9 @@ espacio=[ \t\r\n]+
 "read" |
 "break" |
 "continue" |
-"void" {lexeme=yytext(); return PALABRAS_RESERVADAS;}
+"void" |
 "true" |
-"false" {lexeme=yytext(); return LITERALES;}
+"false" {lexeme=yytext(); line=yyline+1; return PALABRAS_RESERVADAS;}
 "++" |
 "+" |
 "--" |
@@ -49,7 +51,7 @@ espacio=[ \t\r\n]+
 "!=" |
 "*" |
 "/" |
-"%" {lexeme=yytext(); return OPERADORES;}
+"%" {lexeme=yytext(); line=yyline+1; return OPERADORES;}
 "," |
 ";" |
 "(" |
@@ -59,20 +61,24 @@ espacio=[ \t\r\n]+
 "{" |
 "}" |
 ":" |
-"." {lexeme=yytext(); return SEPARADORES;}
-{L}({L}|{D})* {lexeme=yytext(); return IDENTIFICADORES;}
+"." {lexeme=yytext(); line=yyline+1; return SEPARADORES;}
+{L}({L}|{D})* {lexeme=yytext(); line=yyline+1; return IDENTIFICADORES;}
 
 {espacio} {/* ignorar línea */}
 
-\"[^\"\n]*\" {lexeme=yytext(); return LITERALES_STRINGS;}
-0[0-7]+                 {lexeme=yytext(); return LITERALES_OCTALES;}
-0[xX][0-9a-fA-F]+       {lexeme=yytext(); return LITERALES_HEXADECIMALES;}
-{D}+"."{D}+             {lexeme=yytext(); return LITERALES_FLOTANTES;}
-{D}+                    {lexeme=yytext(); return LITERALES_NUMEROS;}
+\"[^\"\n]*\"            {lexeme=yytext(); line=yyline+1; return LITERALES_STRINGS;}
+\"[^\"\n]*              {lexeme=yytext(); line=yyline+1; return ERRORES;}
+0[0-7]+                 {lexeme=yytext(); line=yyline+1; return LITERALES_OCTALES;}
+0[0-9]+                 {lexeme=yytext(); line=yyline+1; return ERRORES;}
+0[xX][0-9a-fA-F]+       {lexeme=yytext(); line=yyline+1; return LITERALES_HEXADECIMALES;}
+0[xX]                   {lexeme=yytext(); line=yyline+1; return ERRORES;}
+{D}+"."{D}+             {lexeme=yytext(); line=yyline+1; return LITERALES_FLOTANTES;}
+{D}+                    {lexeme=yytext(); line=yyline+1; return LITERALES_NUMEROS;}
+{D}+{L}({L}|{D})*       {lexeme=yytext(); line=yyline+1; return ERRORES;}
 
 
 "//"[^\r\n]* {/*Ignorar linea*/}           
-"/*" [^*] ~"*/" {/*Ignorar linea*/}   
 "/*"([^*]|\*+[^*/])*\*+"/" {/*Ignorar bloque*/}
+"/*"([^*]|\*+[^*/])*        {lexeme=yytext(); line=yyline+1; return ERRORES;}
 
- . {return ERRORES;}
+ . {lexeme=yytext(); line=yyline+1; return ERRORES;}
