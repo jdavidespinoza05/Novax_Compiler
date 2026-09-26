@@ -1,0 +1,56 @@
+// ===================================================
+//  PRUEBA COMPLETA DEL SCANNER NOVAX
+// ===================================================
+
+// --- Palabras reservadas (las 26 del enunciado) ---
+main program var const int float bool string array function return if else while do for true false and or not print read break continue void
+
+// --- Identificadores validos ---
+x
+contador1
+Promedio
+mainx
+notas
+
+// --- Identificadores invalidos / casos especiales del enunciado ---
+1numero
+valor-total
+mi variable
+
+// --- Operadores (los 14 del enunciado) ---
+++ -- == >= <= != = + - * / % > <
+
+// --- Separadores (los 10 del enunciado) ---
+, ; ( ) [ ] { } : .
+
+// --- Literales numericos ---
+42
+0
+3.14
+0134
+089
+0X1A4
+0x1a
+0X
+
+// --- Literales string ---
+"hola"
+""
+"esta cadena no cierra
+
+// --- Comentario de linea (no deberia generar ningun token) ---
+// este texto completo se debe ignorar por completo
+
+// --- Comentario de bloque (con un asterisco suelto adentro) ---
+/* este es un comentario
+   de varias lineas, con un * asterisco suelto adentro */
+
+// --- Caracteres invalidos sueltos ---
+@ # $ ~ ?
+
+// --- Prueba integradora: varias categorias en una sola linea ---
+var promedio = 5 + contador1 * 2.5;
+
+// --- Comentario de bloque SIN CERRAR ---
+// (dejar SIEMPRE de ultimo: al no cerrar, consume todo lo que sigue en el archivo)
+/* este comentario de bloque nunca cierra y se come el resto del archivo
