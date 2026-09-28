@@ -4,14 +4,11 @@
  */
 package codigo;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +31,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
         initComponents();
         getContentPane().setBackground(new java.awt.Color(13, 17, 23));
         jScrollPane1.setRowHeaderView(new NumerosDeLinea(txtEntrada));
+        txtResultado.setLineWrap(false);
         this.setLocationRelativeTo(null);
     }
 
@@ -147,20 +145,8 @@ public class FrmPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAnalizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAnalizarActionPerformed
-        File archivo = new File("archivo.txt");
-        PrintWriter escribir;
-        try{
-            escribir = new PrintWriter(archivo);
-            escribir.print(txtEntrada.getText());
-            escribir.close();
-        }
-        catch(FileNotFoundException ex){
-            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
         try {
-            Reader lector = new BufferedReader(new FileReader("archivo.txt"));
-            Lexer lexer = new Lexer(lector);
+            Lexer lexer = new Lexer(new StringReader(txtEntrada.getText()));
 
             Map<String, List<Integer>> lineasPorToken = new LinkedHashMap<>();
             Map<String, Tokens> tipoPorToken = new LinkedHashMap<>();
@@ -171,8 +157,8 @@ public class FrmPrincipal extends javax.swing.JFrame {
                 if (tokens == null) {
                     break;
                 }
-                if (tokens == Tokens.ERRORES) {
-                    errores.add("Linea " + lexer.line + ": simbolo no reconocido \"" + lexer.lexeme + "\"");
+                if (esError(tokens)) {
+                    errores.add("Linea " + lexer.line + ": " + mensajeError(tokens, lexer.lexeme));
                     continue;
                 }
                 lineasPorToken.computeIfAbsent(lexer.lexeme, k -> new ArrayList<>()).add(lexer.line);
@@ -190,9 +176,14 @@ public class FrmPrincipal extends javax.swing.JFrame {
                 }
             }
 
+            List<String> lexemas = new ArrayList<>(lineasPorToken.keySet());
+            lexemas.sort(Comparator
+                    .comparingInt((String lexeme) -> tipoPorToken.get(lexeme).ordinal())
+                    .thenComparing(Comparator.naturalOrder()));
+
             resultado.append("\n=== Tokens encontrados ===\n");
             resultado.append("Token | Tipo de Token | Linea\n");
-            for (String lexeme : lineasPorToken.keySet()) {
+            for (String lexeme : lexemas) {
                 resultado.append(lexeme)
                         .append(" | ")
                         .append(tipoPorToken.get(lexeme))
@@ -203,10 +194,8 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
             txtResultado.setText(resultado.toString());
 
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            System.getLogger(FrmPrincipal.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnAnalizarActionPerformed
 
@@ -223,6 +212,37 @@ public class FrmPrincipal extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_btnCargarActionPerformed
+
+    private boolean esError(Tokens tipo) {
+        return tipo == Tokens.ERRORES
+                || tipo == Tokens.ERROR_IDENTIFICADOR
+                || tipo == Tokens.ERROR_STRING_SIN_CERRAR
+                || tipo == Tokens.ERROR_COMENTARIO_SIN_CERRAR
+                || tipo == Tokens.ERROR_OCTAL
+                || tipo == Tokens.ERROR_HEXADECIMAL;
+    }
+
+    private String mensajeError(Tokens tipo, String lexema) {
+        String recorte = lexema.replace("\r", "").replace("\n", " ");
+        if (recorte.length() > 40) {
+            recorte = recorte.substring(0, 40) + "...";
+        }
+        switch (tipo) {
+            case ERROR_IDENTIFICADOR:
+                return "identificador mal formado \"" + recorte
+                        + "\" (debe iniciar con letra y contener solo letras y digitos)";
+            case ERROR_STRING_SIN_CERRAR:
+                return "cadena sin cerrar \"" + recorte + "\" (falta la comilla final)";
+            case ERROR_COMENTARIO_SIN_CERRAR:
+                return "comentario de bloque sin cerrar (falta */)";
+            case ERROR_OCTAL:
+                return "octal invalido \"" + recorte + "\" (solo se permiten digitos 0-7)";
+            case ERROR_HEXADECIMAL:
+                return "hexadecimal incompleto \"" + recorte + "\" (falta al menos un digito 0-9 A-F)";
+            default:
+                return "simbolo no reconocido \"" + recorte + "\"";
+        }
+    }
 
     private String formatearLineas(List<Integer> lineas) {
         StringBuilder sb = new StringBuilder();
@@ -251,7 +271,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
