@@ -1,0 +1,33 @@
+package codigo;
+
+import java_cup.runtime.Symbol;
+
+parser code
+{:
+    private Symbol s;
+
+    public void syntax_error(Symbol s){
+        this.s = s;
+    }
+
+    public Symbol getS(){
+        return this.s;
+    }
+
+:};
+
+terminal Int, Main, Program, Var, Const, Float, Bool, String, Array, Function, Return, If, Else, While,
+ Do, For, And, Or, Not, Print, Read, Break, Continue, Void, True, False, Doble_Suma, Suma, Doble_Resta, 
+Resta, Doble_Igual, Igual, Mayor_Igual,  Mayor, Menor_Igual, Menor, Diferente, Multiplicacion, Division,
+ Porcentaje, Coma, Punto_Coma, Parentesis_A, Parentesis_B, ParentesisC_A, ParentesisC_B, Corchete_A,
+ Corchete_B, Dos_Puntos, Punto, Identificador, Literales_String, Error_String_Sin_Cerrar,
+  Literales_Octales, Error_Octal, Literales_Hexadecimales, Error_Hexadecimal, Literales_Flotantes,
+ Literales_Numeros, Error_Identificador, Error_Comentario_Sin_Cerrar, Errores;
+
+non terminal INICIO, SENTENCIA;
+
+INICIO ::= Int Main Parentesis_A Parentesis_B Corchete_A SENTENCIA Corchete_B
+        | Program Identificador Corchete_A SENTENCIA Corchete_B
+;
+SENTENCIA ::= Int Identificador Punto_Coma | Int Identificador Igual Literales_Numeros Punto_Coma
+;
