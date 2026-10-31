@@ -24,10 +24,56 @@ Resta, Doble_Igual, Igual, Mayor_Igual,  Mayor, Menor_Igual, Menor, Diferente, M
   Literales_Octales, Error_Octal, Literales_Hexadecimales, Error_Hexadecimal, Literales_Flotantes,
  Literales_Numeros, Error_Identificador, Error_Comentario_Sin_Cerrar, Errores;
 
-non terminal INICIO, SENTENCIA;
+non terminal INICIO, SENTENCIA, INSTRUCCIONES, DECLARACIONES, EXPRESION, VARIABLES_LOCALES_GLOBALES, 
+CONSTANTES, ARREGLOS, FUNCIONES, PARAMETROS, ASIGNACIONES, BREAK_CONTINUE, ESTRUCTURAS_CONTROL;
 
 INICIO ::= Int Main Parentesis_A Parentesis_B Corchete_A SENTENCIA Corchete_B
         | Program Identificador Corchete_A SENTENCIA Corchete_B
 ;
 SENTENCIA ::= Int Identificador Punto_Coma | Int Identificador Igual Literales_Numeros Punto_Coma
+;
+INSTRUCCIONES ::= VARIABLES_LOCALES_GLOBALES | CONSTANTES | ARREGLOS | ASIGNACIONES | ESTRUCTURAS_CONTROL
+;
+DECLARACIONES ::= VARIABLES_LOCALES_GLOBALES
+;
+EXPRESION ::= VARIABLES_LOCALES_GLOBALES
+;
+VARIABLES_LOCALES_GLOBALES ::= Var Identificador Dos_Puntos Int Punto_Coma
+    | Var Identificador Dos_Puntos Float Punto_Coma
+    | Var Identificador Dos_Puntos Bool Punto_Coma
+    | Var Identificador Dos_Puntos String Punto_Coma
+    | Var Identificador Dos_Puntos Int Igual Literales_Numeros Punto_Coma
+    | Var Identificador Dos_Puntos Float Igual Literales_Flotantes Punto_Coma
+    | Var Identificador Dos_Puntos Bool Igual True Punto_Coma
+    | Var Identificador Dos_Puntos Bool Igual False Punto_Coma
+;
+CONSTANTES ::= Const Identificador Dos_Puntos Int Igual Literales_Numeros Punto_Coma
+    | Const Identificador Dos_Puntos Float Igual Literales_Flotantes Punto_Coma
+    | Const Identificador Dos_Puntos Bool Igual True Punto_Coma
+    | Const Identificador Dos_Puntos Bool Igual False Punto_Coma
+    | Const Identificador Dos_Puntos String Igual Literales_String Punto_Coma
+;
+ARREGLOS ::= Var Identificador Dos_Puntos Array ParentesisC_A Int Coma Literales_Numeros ParentesisC_B Punto_Coma
+| Var Identificador Dos_Puntos Array ParentesisC_A Float Coma Literales_Numeros ParentesisC_B Punto_Coma
+| Var Identificador Dos_Puntos Array ParentesisC_A String Coma Literales_Numeros ParentesisC_B Punto_Coma
+| Var Identificador Dos_Puntos Array ParentesisC_A Bool Coma Literales_Numeros ParentesisC_B Punto_Coma
+;
+FUNCIONES ::= Function Identificador Parentesis_A PARAMETROS Parentesis_B Dos_Puntos Int Corchete_A DECLARACIONES INSTRUCCIONES Return EXPRESION Punto_Coma Corchete_A
+| Function Identificador Parentesis_A PARAMETROS Parentesis_B Dos_Puntos Float Corchete_A DECLARACIONES INSTRUCCIONES Return EXPRESION Punto_Coma Corchete_A
+| Function Identificador Parentesis_A PARAMETROS Parentesis_B Dos_Puntos String Corchete_A DECLARACIONES INSTRUCCIONES Return EXPRESION Punto_Coma Corchete_A
+;
+PARAMETROS ::= Identificador Dos_Puntos Int
+    | Identificador Dos_Puntos Float
+    | Identificador Dos_Puntos Bool
+    | Identificador Dos_Puntos String
+    | Identificador Dos_Puntos Void
+;
+ASIGNACIONES ::= Identificador Igual Punto_Coma
+;
+BREAK_CONTINUE ::= Punto_Coma Break
+    | Punto_Coma Continue
+;
+ESTRUCTURAS_CONTROL ::= If True Corchete_A INSTRUCCIONES Corchete_B Else Corchete_A INSTRUCCIONES Corchete_B
+| While True Corchete_A INSTRUCCIONES Corchete_B
+| For VARIABLES_LOCALES_GLOBALES True Punto_Coma VARIABLES_LOCALES_GLOBALES Corchete_A INSTRUCCIONES Corchete_B
 ;
