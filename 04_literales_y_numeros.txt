@@ -1,0 +1,45 @@
+/* Prueba de arreglos, literales y símbolos de agrupación.
+   Este comentario ocupa varias líneas. */
+
+program Datos {
+    main {
+        var valores: array[int, 4];
+        var indice: int = 0;
+        var promedio: float = 0.0;
+        var correcto: bool = false;
+        var valoresf: array[float, 4];
+
+        print("String de 
+		varias lineas:"); 
+
+        read(indice);
+        valores[0] = 42;
+        valores[1] = 7;
+        valores[2] = -18;
+        valores[3] = 25;
+
+
+        valoresf[0] = +1.23; 
+        valoresf[1] = 123.345;
+        valoresf[2] = 123. ;
+        valoresf[3] = .67 ;  
+
+
+	valores[0] = 0123;
+        valores[1] = 0X1A4;
+        valores[2] = 0129; 
+        valores[3] = 0X34G3;  
+
+
+        promedio = (valores[0] + valores[1] + valores[2] + valores[3]) / 4.0;
+        correcto = (indice >= 0) and (indice <= 3);
+
+        if correcto {
+            print("Promedio:");
+            print(promedio);
+            print("Caracteres: ! ? @ # $");
+        } else {
+            print("Indice fuera del rango );
+        }
+    }
+}

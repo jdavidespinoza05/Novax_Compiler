@@ -1,0 +1,16 @@
+/*Con este ejemplo se quiere probar los diferentes tipos de comentarios y 
+ademas que reconozca tanto las palabras reservadas como los operadores*/
+
+
+main  program  var  const  int  float  bool  string  array  function  return 
+if  else  while  do  for  true  false  and  or  not  print  read  break 
+continue  void
+
+
+
+  ,      ;     
+++     --     ==     
+>=     >     <=     <     !=     =    
++     -     *  /     %     
+(     )     [     ]     {     }     :     .  	
+

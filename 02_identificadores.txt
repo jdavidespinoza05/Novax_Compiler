@@ -1,0 +1,27 @@
+// Prueba de palabras reservadas y tipos básicos
+program Reservadas {
+    main {
+        var edad: int = 20;
+        var _precio: float = 12.50;
+	var valor-total: int = 200; 
+
+        var activo: bool = true;
+        var nombre: string = "NOVA";
+	var 12var: int = 12; 
+
+
+	var $aa: string; 
+
+
+        const LIMITE: int = 100;
+	const árbol: int = 19; 
+
+        print(nombre);
+        print(edad);
+        print(precio);
+        print(activo);
+    }
+
+  /* Comentario no cerrado
+	debe dar error
+}
