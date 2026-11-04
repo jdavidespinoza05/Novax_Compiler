@@ -1,0 +1,8 @@
+program Floats {
+  var a: float = 12.;
+  var b: float = .5;
+  var c: float = 3.14;
+  main {
+    a = 0. + 7.25;
+  }
+}

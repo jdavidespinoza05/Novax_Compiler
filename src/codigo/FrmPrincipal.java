@@ -335,6 +335,10 @@ public class FrmPrincipal extends javax.swing.JFrame {
         //    }
         //}
         
+        if (seleccion != javax.swing.JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
         File archivo = new File(selector.getSelectedFile().getAbsolutePath());
         
         try {
@@ -402,7 +406,8 @@ public class FrmPrincipal extends javax.swing.JFrame {
                 || tipo == Tokens.ERROR_STRING_SIN_CERRAR
                 || tipo == Tokens.ERROR_COMENTARIO_SIN_CERRAR
                 || tipo == Tokens.ERROR_OCTAL
-                || tipo == Tokens.ERROR_HEXADECIMAL;
+                || tipo == Tokens.ERROR_HEXADECIMAL
+                || tipo == Tokens.ERROR_FLOTANTE;
     }
 
     private String mensajeError(Tokens tipo, String lexema) {
@@ -422,6 +427,8 @@ public class FrmPrincipal extends javax.swing.JFrame {
                 return "octal invalido \"" + recorte + "\" (solo se permiten digitos 0-7)";
             case ERROR_HEXADECIMAL:
                 return "hexadecimal incompleto \"" + recorte + "\" (falta al menos un digito 0-9 A-F)";
+            case ERROR_FLOTANTE:
+                return "flotante incompleto \"" + recorte + "\" (debe tener al menos un digito antes y despues del punto)";
             default:
                 return "simbolo no reconocido \"" + recorte + "\"";
         }

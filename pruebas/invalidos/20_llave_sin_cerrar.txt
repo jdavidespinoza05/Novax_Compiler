@@ -1,0 +1,6 @@
+program P {
+  main {
+    while x < 3 {
+      x = x + 1;
+  }
+}

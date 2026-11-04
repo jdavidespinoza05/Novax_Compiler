@@ -1,0 +1,16 @@
+program Anidados {
+  main {
+    var i: int = 0;
+    while i < 10 {
+      for var j: int = 0; j < 5; j++ {
+        if j == 2 {
+          i = i + ;
+        } else {
+          print("par" j);
+        }
+      }
+      i++;
+    }
+    var fin: bool = true
+  }
+}

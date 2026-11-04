@@ -1,0 +1,7 @@
+program P {
+  main {
+    if (a > b) {
+      a = 1;
+    }
+  }
+}

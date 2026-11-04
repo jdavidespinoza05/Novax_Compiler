@@ -1,0 +1,11 @@
+program Comentarios {
+  // comentario de linea
+  var x: int = 5; /* bloque
+  de varias lineas */
+  main {
+    x = (x + 1) * (2 - x);
+    if (x > 1) and (x < 9) {
+      print(x);
+    }
+  }
+}

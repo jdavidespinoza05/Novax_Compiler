@@ -1,0 +1,9 @@
+program P {
+  function f(a: int): int
+    return a;
+  }
+  main {
+    x = f(1;
+    y = 2;
+  }
+}

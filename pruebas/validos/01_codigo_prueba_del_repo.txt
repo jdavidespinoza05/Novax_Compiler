@@ -1,0 +1,29 @@
+program Promedio {
+var notas: array[float, 5];
+ function calcularPromedio ( n1: float, n2: float, n3: float ): float {
+return (n1 + n2 + n3) / 3;
+ }
+ function mostrarResultado(nota: float): void {
+if nota >= 70 {
+print("Aprobado");
+} else {
+print("Reprobado");
+}
+ }
+ main {
+var nota1: float;
+var nota2: float;
+var nota3: float;
+var promedio: float;
+print("Ingrese la primera nota:");
+read(nota1);
+print("Ingrese la segunda nota:");
+read(nota2);
+print("Ingrese la tercera nota:");
+read(nota3);
+promedio = calcularPromedio( nota1, nota2, nota3);
+print("Promedio:");
+print(promedio);
+mostrarResultado(promedio);
+ }
+}

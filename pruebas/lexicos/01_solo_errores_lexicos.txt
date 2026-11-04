@@ -1,0 +1,8 @@
+program P {
+  var a: int = 0X;
+  var 1b: int = 089;
+  var s: string = "hola;
+  main {
+    a = a @ + 1;
+  }
+}

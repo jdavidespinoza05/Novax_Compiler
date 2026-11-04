@@ -1,0 +1,6 @@
+program P {
+  function f(): void {
+  }
+  var x: int;
+  main { }
+}

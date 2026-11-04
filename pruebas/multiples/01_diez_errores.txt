@@ -1,0 +1,21 @@
+program Multiples {
+  var a: int
+  var b: float = 2.5;
+  const C: int;
+  function f(x: int, y): int {
+    return x;
+  }
+  main {
+    a = ;
+    print();
+    read(a, b);
+    if (a > 1) {
+      b = 1.0
+    }
+    while a + 1 {
+      a = a - 1;
+    }
+    break
+    x = 5;
+  }
+}

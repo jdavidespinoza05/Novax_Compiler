@@ -91,6 +91,8 @@ simboloInvalido=[^[:letter:][:digit:]_ \t\r\n+\-*/%=<>!,;()\[\]{}:.\"]
 0[xX][0-9a-fA-F]+       {return symbol(sym.Literales_Hexadecimales);}
 0[xX]                   {error("hexadecimal incompleto \"" + recorte() + "\" (falta al menos un digito 0-9 A-F)"); return symbol(sym.Literales_Hexadecimales);}
 {D}+"."{D}+             {return symbol(sym.Literales_Flotantes);}
+{D}+"."                 {error("flotante incompleto \"" + recorte() + "\" (debe tener al menos un digito antes y despues del punto)"); return symbol(sym.Literales_Flotantes);}
+"."{D}+                 {error("flotante incompleto \"" + recorte() + "\" (debe tener al menos un digito antes y despues del punto)"); return symbol(sym.Literales_Flotantes);}
 {D}+                    {return symbol(sym.Literales_Numeros);}
 {identChar}+            {error("identificador mal formado \"" + recorte() + "\" (debe iniciar con letra y contener solo letras y digitos)"); return symbol(sym.Identificador);}
 

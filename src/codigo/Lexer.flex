@@ -6,7 +6,7 @@ import static codigo.Tokens.*;
 %line
 L=[a-zA-Z]
 D=[0-9]
-espacio=[ \t\r]+
+espacio=[ \t\r\n]+
 identChar=[[:letter:][:digit:]_]
 simboloInvalido=[^[:letter:][:digit:]_ \t\r\n+\-*/%=<>!,;()\[\]{}:.\"]
 %{
@@ -15,7 +15,6 @@ simboloInvalido=[^[:letter:][:digit:]_ \t\r\n+\-*/%=<>!,;()\[\]{}:.\"]
 %}
 %%
 "main" {lexeme=yytext(); line=yyline+1; return Main;}
-"\n" {lexeme=yytext(); line=yyline+1; return Salto_Linea;}
 "program" {lexeme=yytext(); line=yyline+1; return Program;}
 "var" {lexeme=yytext(); line=yyline+1; return Var;}
 "const" {lexeme=yytext(); line=yyline+1; return Const;}
@@ -77,6 +76,8 @@ simboloInvalido=[^[:letter:][:digit:]_ \t\r\n+\-*/%=<>!,;()\[\]{}:.\"]
 0[xX][0-9a-fA-F]+       {lexeme=yytext(); line=yyline+1; return LITERALES_HEXADECIMALES;}
 0[xX]                   {lexeme=yytext(); line=yyline+1; return ERROR_HEXADECIMAL;}
 {D}+"."{D}+             {lexeme=yytext(); line=yyline+1; return LITERALES_FLOTANTES;}
+{D}+"."                 {lexeme=yytext(); line=yyline+1; return ERROR_FLOTANTE;}
+"."{D}+                 {lexeme=yytext(); line=yyline+1; return ERROR_FLOTANTE;}
 {D}+                    {lexeme=yytext(); line=yyline+1; return LITERALES_NUMEROS;}
 {identChar}+            {lexeme=yytext(); line=yyline+1; return ERROR_IDENTIFICADOR;}
 

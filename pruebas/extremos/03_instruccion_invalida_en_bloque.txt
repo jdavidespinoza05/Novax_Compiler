@@ -1,0 +1,8 @@
+program P {
+  main {
+    while true {
+      5
+    }
+    x = 1;
+  }
+}

@@ -1,0 +1,5 @@
+program {
+  main {
+    x = 1
+  }
+}

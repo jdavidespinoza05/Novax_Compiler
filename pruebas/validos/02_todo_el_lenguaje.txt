@@ -1,0 +1,69 @@
+program Completo {
+  var contador: int;
+  var edad: int = 20;
+  var precio: float = 25.50;
+  var activo: bool = true;
+  var nombre: string = "Novax";
+  const PI: float = 3.14159;
+  const MAX: int = 100;
+  var notas: array[float, 5];
+  var datos: array[int, MAX];
+  var octal: int = 0134;
+  var hexa: int = 0x1A4;
+
+  function sumar(a: int, b: int): int {
+    var resultado: int;
+    resultado = a + b * 2 - (a % 3) / 1;
+    return resultado;
+  }
+
+  function saludar(): void {
+    print("Hola");
+  }
+
+  function esMayor(x: float, y: float): bool {
+    return x > y and not (x == y) or false;
+  }
+
+  main {
+    var i: int = 0;
+    var total: int;
+    read();
+    read(total);
+    read(notas[2]);
+    print("Total:", total, sumar(1, 2), -total);
+    total = sumar(edad, 3);
+    total = sumar(sumar(1, 2), edad + 1);
+    notas[i + 1] = 9.5;
+    saludar();
+    i++;
+    i--;
+    if total >= 10 {
+      print("grande");
+    } else {
+      print("pequeno");
+    }
+    if activo {
+      break;
+    }
+    if total < 0 {
+      total = 0;
+    } else if total > MAX {
+      total = MAX;
+    }
+    while i < 10 and activo {
+      i = i + 1;
+      if i == 5 {
+        continue;
+      }
+      for var j: int = 0; j < 3; j++ {
+        for k = 0; k != 2; k = k + 1 {
+          while not activo {
+            activo = esMayor(1.5, 2.0) or i <= 3;
+          }
+        }
+      }
+    }
+    return;
+  }
+}

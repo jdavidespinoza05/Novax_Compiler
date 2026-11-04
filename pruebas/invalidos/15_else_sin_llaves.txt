@@ -1,0 +1,6 @@
+program P {
+  main {
+    if x > 1 {
+    } else print("x");
+  }
+}

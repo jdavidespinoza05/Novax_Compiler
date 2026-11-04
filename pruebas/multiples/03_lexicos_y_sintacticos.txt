@@ -1,0 +1,8 @@
+program Mezcla {
+  var 1x: int = 0X;
+  var y: int = 5 @ 3;
+  main {
+    y = y +* 2;
+    print("sin cerrar);
+    y = 1;
+  }

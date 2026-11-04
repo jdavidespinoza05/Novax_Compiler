@@ -1,0 +1,6 @@
+program P {
+  function f(): int {
+    return 1
+  }
+  main { }
+}
