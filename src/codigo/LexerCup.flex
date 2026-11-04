@@ -6,92 +6,99 @@ import java_cup.runtime.Symbol;
 %cup
 %full
 %line
-%char
+%column
 L=[a-zA-Z]
 D=[0-9]
 espacio=[ \t\r\n]+
 identChar=[[:letter:][:digit:]_]
 simboloInvalido=[^[:letter:][:digit:]_ \t\r\n+\-*/%=<>!,;()\[\]{}:.\"]
 %{
-    private Symbol symbol(int type, Object value) {
-        return new Symbol (type, yyline, yycolumn, value);
+    public java.util.List<String> erroresLexicos = new java.util.ArrayList<>();
+
+    private Symbol symbol(int tipo) {
+        return new Symbol(tipo, yyline + 1, yycolumn + 1, yytext());
     }
-    private Symbol symbol(int type) {
-        return new Symbol (type, yyline, yycolumn);
+
+    private void error(String mensaje) {
+        erroresLexicos.add("Linea " + (yyline + 1) + ": " + mensaje);
     }
-    public int line;
+
+    private String recorte() {
+        String texto = yytext().replace("\r", "").replace("\n", " ");
+        return texto.length() > 40 ? texto.substring(0, 40) + "..." : texto;
+    }
 %}
 %%
-"main" {return new Symbol(sym.Main, (int) yychar, yyline, yytext());}
-"program" {return new Symbol(sym.Program, (int) yychar, yyline, yytext());}
-"var" {return new Symbol(sym.Var, (int) yychar, yyline, yytext());}
-"const" {return new Symbol(sym.Const, (int) yychar, yyline, yytext());}
-"int" {return new Symbol(sym.Int, (int) yychar, yyline, yytext());}
-"float" {return new Symbol(sym.Float, (int) yychar, yyline, yytext());}
-"bool" {return new Symbol(sym.Bool, (int) yychar, yyline, yytext());}
-"string" {return new Symbol(sym.String, (int) yychar, yyline, yytext());}
-"array" {return new Symbol(sym.Array, (int) yychar, yyline, yytext());}
-"function" {return new Symbol(sym.Function, (int) yychar, yyline, yytext());}
-"return" {return new Symbol(sym.Return, (int) yychar, yyline, yytext());}
-"if" {return new Symbol(sym.If, (int) yychar, yyline, yytext());}
-"else" {return new Symbol(sym.Else, (int) yychar, yyline, yytext());}
-"while" {return new Symbol(sym.While, (int) yychar, yyline, yytext());}
-"do" {return new Symbol(sym.Do, (int) yychar, yyline, yytext());}
-"for" {return new Symbol(sym.For, (int) yychar, yyline, yytext());}
-"and" {return new Symbol(sym.And, (int) yychar, yyline, yytext());}
-"or" {return new Symbol(sym.Or, (int) yychar, yyline, yytext());}
-"not" {return new Symbol(sym.Not, (int) yychar, yyline, yytext());}
-"print" {return new Symbol(sym.Print, (int) yychar, yyline, yytext());}
-"read" {return new Symbol(sym.Read, (int) yychar, yyline, yytext());}
-"break" {return new Symbol(sym.Break, (int) yychar, yyline, yytext());}
-"continue" {return new Symbol(sym.Continue, (int) yychar, yyline, yytext());}
-"void" {return new Symbol(sym.Void, (int) yychar, yyline, yytext());}
-"true" {return new Symbol(sym.True, (int) yychar, yyline, yytext());}
-"false" {return new Symbol(sym.False, (int) yychar, yyline, yytext());}
-"++" {return new Symbol(sym.Doble_Suma, (int) yychar, yyline, yytext());}
-"+" {return new Symbol(sym.Suma, (int) yychar, yyline, yytext());}
-"--" {return new Symbol(sym.Doble_Resta, (int) yychar, yyline, yytext());}
-"-" {return new Symbol(sym.Resta, (int) yychar, yyline, yytext());}
-"==" {return new Symbol(sym.Doble_Igual, (int) yychar, yyline, yytext());}
-"=" {return new Symbol(sym.Igual, (int) yychar, yyline, yytext());}
-">=" {return new Symbol(sym.Mayor_Igual, (int) yychar, yyline, yytext());}
-">" {return new Symbol(sym.Mayor, (int) yychar, yyline, yytext());}
-"<=" {return new Symbol(sym.Menor_Igual, (int) yychar, yyline, yytext());}
-"<" {return new Symbol(sym.Menor, (int) yychar, yyline, yytext());}
-"!=" {return new Symbol(sym.Diferente, (int) yychar, yyline, yytext());}
-"*" {return new Symbol(sym.Multiplicacion, (int) yychar, yyline, yytext());}
-"/" {return new Symbol(sym.Division, (int) yychar, yyline, yytext());}
-"%" {return new Symbol(sym.Porcentaje, (int) yychar, yyline, yytext());}
-"," {return new Symbol(sym.Coma, (int) yychar, yyline, yytext());}
-";" {return new Symbol(sym.Punto_Coma, (int) yychar, yyline, yytext());}
-"(" {return new Symbol(sym.Parentesis_A, (int) yychar, yyline, yytext());}
-")" {return new Symbol(sym.Parentesis_B, (int) yychar, yyline, yytext());}
-"[" {return new Symbol(sym.ParentesisC_A, (int) yychar, yyline, yytext());}
-"]" {return new Symbol(sym.ParentesisC_B, (int) yychar, yyline, yytext());}
-"{" {return new Symbol(sym.Corchete_A, (int) yychar, yyline, yytext());}
-"}" {return new Symbol(sym.Corchete_B, (int) yychar, yyline, yytext());}
-":" {return new Symbol(sym.Dos_Puntos, (int) yychar, yyline, yytext());}
-"." {return new Symbol(sym.Punto, (int) yychar, yyline, yytext());}
+"main" {return symbol(sym.Main);}
+"program" {return symbol(sym.Program);}
+"var" {return symbol(sym.Var);}
+"const" {return symbol(sym.Const);}
+"int" {return symbol(sym.Int);}
+"float" {return symbol(sym.Float);}
+"bool" {return symbol(sym.Bool);}
+"string" {return symbol(sym.String);}
+"array" {return symbol(sym.Array);}
+"function" {return symbol(sym.Function);}
+"return" {return symbol(sym.Return);}
+"if" {return symbol(sym.If);}
+"else" {return symbol(sym.Else);}
+"while" {return symbol(sym.While);}
+"do" {return symbol(sym.Do);}
+"for" {return symbol(sym.For);}
+"and" {return symbol(sym.And);}
+"or" {return symbol(sym.Or);}
+"not" {return symbol(sym.Not);}
+"print" {return symbol(sym.Print);}
+"read" {return symbol(sym.Read);}
+"break" {return symbol(sym.Break);}
+"continue" {return symbol(sym.Continue);}
+"void" {return symbol(sym.Void);}
+"true" {return symbol(sym.True);}
+"false" {return symbol(sym.False);}
+"++" {return symbol(sym.Doble_Suma);}
+"+" {return symbol(sym.Suma);}
+"--" {return symbol(sym.Doble_Resta);}
+"-" {return symbol(sym.Resta);}
+"==" {return symbol(sym.Doble_Igual);}
+"=" {return symbol(sym.Igual);}
+">=" {return symbol(sym.Mayor_Igual);}
+">" {return symbol(sym.Mayor);}
+"<=" {return symbol(sym.Menor_Igual);}
+"<" {return symbol(sym.Menor);}
+"!=" {return symbol(sym.Diferente);}
+"*" {return symbol(sym.Multiplicacion);}
+"/" {return symbol(sym.Division);}
+"%" {return symbol(sym.Porcentaje);}
+"," {return symbol(sym.Coma);}
+";" {return symbol(sym.Punto_Coma);}
+"(" {return symbol(sym.Parentesis_A);}
+")" {return symbol(sym.Parentesis_B);}
+"[" {return symbol(sym.ParentesisC_A);}
+"]" {return symbol(sym.ParentesisC_B);}
+"{" {return symbol(sym.Corchete_A);}
+"}" {return symbol(sym.Corchete_B);}
+":" {return symbol(sym.Dos_Puntos);}
+"." {return symbol(sym.Punto);}
 
-{L}({L}|{D})* {return new Symbol(sym.Identificador, (int) yychar, yyline, yytext());}
+{L}({L}|{D})* {return symbol(sym.Identificador);}
 
 {espacio} {/* ignorar espacios */}
 
-\"[^\"\r\n]*\"          {return new Symbol(sym.Literales_String, (int) yychar, yyline, yytext());}
-\"[^\"\r\n]*            {return new Symbol(sym.Error_String_Sin_Cerrar, (int) yychar, yyline, yytext());}
-0[0-7]+                 {return new Symbol(sym.Literales_Octales, (int) yychar, yyline, yytext());}
-0[0-9]+                 {return new Symbol(sym.Error_Octal, (int) yychar, yyline, yytext());}
-0[xX][0-9a-fA-F]+       {return new Symbol(sym.Literales_Hexadecimales, (int) yychar, yyline, yytext());}
-0[xX]                   {return new Symbol(sym.Error_Hexadecimal, (int) yychar, yyline, yytext());}
-{D}+"."{D}+             {return new Symbol(sym.Literales_Flotantes, (int) yychar, yyline, yytext());}
-{D}+                    {return new Symbol(sym.Literales_Numeros, (int) yychar, yyline, yytext());}
-{identChar}+            {return new Symbol(sym.Error_Identificador, (int) yychar, yyline, yytext());}
+\"[^\"\r\n]*\"          {return symbol(sym.Literales_String);}
+\"[^\"\r\n]*            {error("cadena sin cerrar " + recorte() + " (falta la comilla final)"); return symbol(sym.Literales_String);}
+0[0-7]+                 {return symbol(sym.Literales_Octales);}
+0[0-9]+                 {error("octal invalido \"" + recorte() + "\" (solo se permiten digitos 0-7)"); return symbol(sym.Literales_Octales);}
+0[xX][0-9a-fA-F]+       {return symbol(sym.Literales_Hexadecimales);}
+0[xX]                   {error("hexadecimal incompleto \"" + recorte() + "\" (falta al menos un digito 0-9 A-F)"); return symbol(sym.Literales_Hexadecimales);}
+{D}+"."{D}+             {return symbol(sym.Literales_Flotantes);}
+{D}+                    {return symbol(sym.Literales_Numeros);}
+{identChar}+            {error("identificador mal formado \"" + recorte() + "\" (debe iniciar con letra y contener solo letras y digitos)"); return symbol(sym.Identificador);}
 
 
 "//"[^\r\n]* {/*Ignorar linea*/}
 "/*"([^*]|\*+[^*/])*\*+"/" {/*Ignorar bloque*/}
-"/*"([^*]|\*+[^*/])*\**     {return new Symbol(sym.Error_Comentario_Sin_Cerrar, (int) yychar, yyline, yytext());}
+"/*"([^*]|\*+[^*/])*\**     {error("comentario de bloque sin cerrar (falta */)");}
 
-{simboloInvalido}+ {return new Symbol(sym.Errores, (int) yychar, yyline, yytext());}
- . {return new Symbol(sym.Errores, (int) yychar, yyline, yytext());}
+{simboloInvalido}+ {error("simbolo no reconocido \"" + recorte() + "\"");}
+ . {error("simbolo no reconocido \"" + recorte() + "\"");}
 

@@ -352,20 +352,35 @@ public class FrmPrincipal extends javax.swing.JFrame {
         // TODO add your handling code here:
         
         String ST = txtEntrada.getText();
-        Sintax s = new Sintax(new codigo.LexerCup(new StringReader(ST)));
-        
+        LexerCup lexer = new LexerCup(new StringReader(ST));
+        Sintax s = new Sintax(lexer);
+        List<String> erroresSintacticos = new ArrayList<>();
+
         try {
             s.parse();
-            txtResultadoSintactico.setText("Analisis realizado");
-            
         } catch (Exception ex) {
-            Symbol sym = s.getS();
-            txtResultadoSintactico.setText("Error de sintaxis. Linea: " + (sym.right + 1) + " Columna: " + 
-                    (sym.left + 1) + ", Texto: \"" + sym.value + "\"");
-        
+            Symbol simbolo = s.getS();
+            if (simbolo == null || simbolo.sym == sym.EOF) {
+                erroresSintacticos.add("Final del archivo: el programa termino antes de lo esperado");
+            } else {
+                erroresSintacticos.add("Linea " + simbolo.left + ", columna " + simbolo.right
+                        + ": error de sintaxis cerca de \"" + simbolo.value + "\"");
+            }
         }
-        
-        
+
+        try {
+            while (lexer.next_token().sym != sym.EOF) {
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        StringBuilder resultado = new StringBuilder();
+        resultado.append("=== Errores lexicos ===\n");
+        agregarLista(resultado, lexer.erroresLexicos);
+        resultado.append("\n=== Errores sintacticos ===\n");
+        agregarLista(resultado, erroresSintacticos);
+        txtResultadoSintactico.setText(resultado.toString());
     }//GEN-LAST:event_btnAnalizarSintacticoActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -377,6 +392,16 @@ public class FrmPrincipal extends javax.swing.JFrame {
         // TODO add your handling code here:
         txtResultadoSintactico.setText(null);
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void agregarLista(StringBuilder resultado, List<String> errores) {
+        if (errores.isEmpty()) {
+            resultado.append("No se encontraron errores.\n");
+        } else {
+            for (String error : errores) {
+                resultado.append(error).append("\n");
+            }
+        }
+    }
 
     private boolean esError(Tokens tipo) {
         return tipo == Tokens.ERRORES

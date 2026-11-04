@@ -20,9 +20,9 @@ terminal Int, Main, Program, Var, Const, Float, Bool, String, Array, Function, R
  Do, For, And, Or, Not, Print, Read, Break, Continue, Void, True, False, Doble_Suma, Suma, Doble_Resta, 
 Resta, Doble_Igual, Igual, Mayor_Igual,  Mayor, Menor_Igual, Menor, Diferente, Multiplicacion, Division,
  Porcentaje, Coma, Punto_Coma, Parentesis_A, Parentesis_B, ParentesisC_A, ParentesisC_B, Corchete_A,
- Corchete_B, Dos_Puntos, Punto, Identificador, Literales_String, Error_String_Sin_Cerrar,
-  Literales_Octales, Error_Octal, Literales_Hexadecimales, Error_Hexadecimal, Literales_Flotantes,
- Literales_Numeros, Error_Identificador, Error_Comentario_Sin_Cerrar, Errores;
+ Corchete_B, Dos_Puntos, Punto, Identificador, Literales_String,
+  Literales_Octales, Literales_Hexadecimales, Literales_Flotantes,
+ Literales_Numeros;
 
 non terminal INICIO, SENTENCIA, INSTRUCCIONES, DECLARACIONES, EXPRESION, VARIABLES_LOCALES_GLOBALES, 
 CONSTANTES, ARREGLOS, FUNCIONES, PARAMETROS, ASIGNACIONES, BREAK_CONTINUE, ESTRUCTURAS_CONTROL;
