@@ -2,15 +2,77 @@ package codigo;
 
 import java_cup.runtime.Symbol;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 parser code
 {:
     private Symbol s;
-    private List<String> erroresSintacticos = new ArrayList<>();
+    private Symbol actual;
+    private Symbol anterior;
+    private Symbol anteAnterior;
+    private int ultimaLineaError = -1;
+    private List<ErrorSintactico> errores = new ArrayList<>();
+
+    private static class ErrorSintactico {
+        int linea;
+        String mensaje;
+
+        ErrorSintactico(int linea, String mensaje) {
+            this.linea = linea;
+            this.mensaje = mensaje;
+        }
+    }
+
+    private static final List<Integer> INICIO_INSTRUCCION = Arrays.asList(sym.Var, sym.Const, sym.Identificador,
+            sym.Print, sym.Read, sym.Break, sym.Continue, sym.Return, sym.If, sym.While, sym.For);
+    private static final List<Integer> INICIO_EXPRESION = Arrays.asList(sym.Literales_Numeros, sym.Literales_Flotantes,
+            sym.Literales_Octales, sym.Literales_Hexadecimales, sym.Literales_String, sym.True, sym.False,
+            sym.Identificador, sym.Parentesis_A, sym.Resta, sym.Not);
+    private static final List<Integer> TIPOS = Arrays.asList(sym.Int, sym.Float, sym.Bool, sym.String);
+    private static final List<Integer> CONTINUACIONES = Arrays.asList(sym.Or, sym.And, sym.Doble_Igual, sym.Diferente,
+            sym.Menor, sym.Mayor, sym.Menor_Igual, sym.Mayor_Igual, sym.Suma, sym.Resta, sym.Multiplicacion,
+            sym.Division, sym.Porcentaje, sym.Parentesis_A, sym.ParentesisC_A, sym.Doble_Suma, sym.Doble_Resta);
+
+    public Symbol scan() throws Exception {
+        anteAnterior = anterior;
+        anterior = actual;
+        actual = super.scan();
+        return actual;
+    }
 
     public void syntax_error(Symbol s){
         this.s = s;
+        List<Integer> esperados = tokensEsperados();
+        boolean finDeArchivo = s.sym == sym.EOF;
+        int linea = finDeArchivo ? lineaAnterior() : s.left;
+        String encontrado = finDeArchivo ? "el final del archivo" : "'" + s.value + "'";
+        String mensaje;
+
+        if (esperados.contains(sym.Punto_Coma) && anterior != null
+                && (finDeArchivo || s.sym == sym.Corchete_B || s.left > anterior.left)) {
+            linea = anterior.left;
+            mensaje = "falta ';' despues de '" + anterior.value + "'";
+        } else if (s.sym == sym.Parentesis_B && anterior != null && anterior.sym == sym.Parentesis_A
+                && anteAnterior != null && anteAnterior.sym == sym.Print) {
+            mensaje = "print necesita al menos un parametro";
+        } else if (s.sym == sym.Coma && esperados.contains(sym.Parentesis_B) && !esperados.contains(sym.Coma)) {
+            mensaje = "read acepta como maximo un parametro";
+        } else if (finDeArchivo) {
+            mensaje = "el archivo termino antes de tiempo, se esperaba " + describir(esperados);
+        } else {
+            mensaje = "se encontro " + encontrado + " pero se esperaba " + describir(esperados);
+        }
+
+        if (linea != ultimaLineaError) {
+            errores.add(new ErrorSintactico(linea, mensaje));
+            ultimaLineaError = linea;
+        }
+    }
+
+    public void unrecovered_syntax_error(Symbol s){
     }
 
     public Symbol getS(){
@@ -18,14 +80,107 @@ parser code
     }
 
     public List<String> getErroresSintacticos(){
-        return erroresSintacticos;
+        List<ErrorSintactico> ordenados = new ArrayList<>(errores);
+        ordenados.sort((a, b) -> Integer.compare(a.linea, b.linea));
+        List<String> resultado = new ArrayList<>();
+        for (ErrorSintactico e : ordenados) {
+            resultado.add("Linea " + e.linea + ": " + e.mensaje);
+        }
+        return resultado;
     }
 
     public void verificarCondicion(String tipo, int linea){
         if (tipo.equals("parentesis")) {
-            erroresSintacticos.add("Linea " + linea + ": la condicion no va entre parentesis");
+            errores.add(new ErrorSintactico(linea, "la condicion no va entre parentesis"));
         } else if (tipo.equals("noBooleana")) {
-            erroresSintacticos.add("Linea " + linea + ": la condicion debe ser una expresion booleana (comparacion, and, or, not, true o false)");
+            errores.add(new ErrorSintactico(linea, "la condicion debe ser una expresion booleana (comparacion, and, or, not, true o false)"));
+        }
+    }
+
+    private List<Integer> tokensEsperados() {
+        List<Integer> esperados = new ArrayList<>();
+        for (int token = 0; token < sym.terminalNames.length; token++) {
+            if (token != sym.error && aceptaria(token)) {
+                esperados.add(token);
+            }
+        }
+        return esperados;
+    }
+
+    private boolean aceptaria(int token) {
+        List<Integer> pila = new ArrayList<>();
+        for (Object elemento : stack) {
+            pila.add(((Symbol) elemento).parse_state);
+        }
+        for (int pasos = 0; pasos < 1000; pasos++) {
+            short accion = get_action(pila.get(pila.size() - 1), token);
+            if (accion == 0) {
+                return false;
+            }
+            if (accion > 0) {
+                return true;
+            }
+            int produccion = -accion - 1;
+            for (int i = 0; i < production_tab[produccion][1]; i++) {
+                pila.remove(pila.size() - 1);
+            }
+            pila.add((int) get_reduce(pila.get(pila.size() - 1), production_tab[produccion][0]));
+        }
+        return false;
+    }
+
+    private int lineaAnterior() {
+        return anterior != null ? anterior.left : 1;
+    }
+
+    private String describir(List<Integer> ids) {
+        Set<Integer> esperados = new LinkedHashSet<>(ids);
+        esperados.remove(sym.error);
+        List<String> partes = new ArrayList<>();
+        if (esperados.contains(sym.Print) && esperados.contains(sym.If)) {
+            partes.add("una instruccion");
+            esperados.removeAll(INICIO_INSTRUCCION);
+        }
+        if (esperados.contains(sym.Literales_Numeros) && esperados.contains(sym.Parentesis_A)) {
+            partes.add("una expresion");
+            esperados.removeAll(INICIO_EXPRESION);
+        }
+        if (esperados.contains(sym.Int) && esperados.contains(sym.String)) {
+            partes.add(esperados.contains(sym.Void) ? "un tipo (int, float, bool, string o void)" : "un tipo (int, float, bool o string)");
+            esperados.removeAll(TIPOS);
+            esperados.remove(sym.Void);
+        }
+        esperados.removeAll(CONTINUACIONES);
+        for (Integer id : esperados) {
+            partes.add(nombre(id));
+        }
+        if (partes.isEmpty()) {
+            return "otro simbolo";
+        }
+        if (partes.size() == 1) {
+            return partes.get(0);
+        }
+        return String.join(", ", partes.subList(0, partes.size() - 1)) + " o " + partes.get(partes.size() - 1);
+    }
+
+    private String nombre(int id) {
+        switch (id) {
+            case sym.Punto_Coma: return "';'";
+            case sym.Coma: return "','";
+            case sym.Dos_Puntos: return "':'";
+            case sym.Igual: return "'='";
+            case sym.Parentesis_A: return "'('";
+            case sym.Parentesis_B: return "')'";
+            case sym.ParentesisC_A: return "'['";
+            case sym.ParentesisC_B: return "']'";
+            case sym.Corchete_A: return "'{'";
+            case sym.Corchete_B: return "'}'";
+            case sym.Identificador: return "un identificador";
+            case sym.Literales_Numeros: return "un numero entero";
+            case sym.Literales_Octales: return "un numero octal";
+            case sym.Literales_Hexadecimales: return "un numero hexadecimal";
+            case sym.EOF: return "el final del archivo";
+            default: return "'" + sym.terminalNames[id].toLowerCase() + "'";
         }
     }
 
@@ -42,9 +197,9 @@ Resta, Doble_Igual, Igual, Mayor_Igual,  Mayor, Menor_Igual, Menor, Diferente, M
 terminal MENOS_UNARIO;
 
 non terminal PROGRAMA, DECLARACIONES_GLOBALES, DECLARACION, TIPO, TAMANO_ARREGLO, FUNCIONES, FUNCION,
- TIPO_RETORNO, PARAMETROS, LISTA_PARAMETROS, PARAMETRO, BLOQUE_MAIN, INSTRUCCIONES, INSTRUCCION,
- DESTINO, ASIGNACION, INCREMENTO, LLAMADA, ARGUMENTOS, LISTA_EXPRESIONES, ESTRUCTURA_IF, ESTRUCTURA_WHILE,
- ESTRUCTURA_FOR, INICIALIZACION_FOR, ACTUALIZACION_FOR, CONDICION;
+ TIPO_RETORNO, PARAMETROS, LISTA_PARAMETROS, PARAMETRO, BLOQUE_MAIN, BLOQUE, INSTRUCCIONES, INSTRUCCION,
+ PUNTO_COMA, DESTINO, ASIGNACION, INCREMENTO, LLAMADA, ARGUMENTOS, LISTA_EXPRESIONES, ESTRUCTURA_IF,
+ PARTE_ELSE, ESTRUCTURA_WHILE, ESTRUCTURA_FOR, INICIALIZACION_FOR, ACTUALIZACION_FOR, CONDICION;
 
 non terminal String EXPRESION, VALOR;
 
@@ -60,15 +215,17 @@ precedence right MENOS_UNARIO;
 start with PROGRAMA;
 
 PROGRAMA ::= Program Identificador Corchete_A DECLARACIONES_GLOBALES FUNCIONES BLOQUE_MAIN Corchete_B
+    | Program error Corchete_A DECLARACIONES_GLOBALES FUNCIONES BLOQUE_MAIN Corchete_B
 ;
 
 DECLARACIONES_GLOBALES ::= DECLARACIONES_GLOBALES DECLARACION
+    | DECLARACIONES_GLOBALES error Punto_Coma
     |
 ;
-DECLARACION ::= Var Identificador Dos_Puntos TIPO Punto_Coma
-    | Var Identificador Dos_Puntos TIPO Igual EXPRESION Punto_Coma
-    | Var Identificador Dos_Puntos Array ParentesisC_A TIPO Coma TAMANO_ARREGLO ParentesisC_B Punto_Coma
-    | Const Identificador Dos_Puntos TIPO Igual EXPRESION Punto_Coma
+DECLARACION ::= Var Identificador Dos_Puntos TIPO PUNTO_COMA
+    | Var Identificador Dos_Puntos TIPO Igual EXPRESION PUNTO_COMA
+    | Var Identificador Dos_Puntos Array ParentesisC_A TIPO Coma TAMANO_ARREGLO ParentesisC_B PUNTO_COMA
+    | Const Identificador Dos_Puntos TIPO Igual EXPRESION PUNTO_COMA
 ;
 TIPO ::= Int | Float | Bool | String
 ;
@@ -78,7 +235,8 @@ TAMANO_ARREGLO ::= Literales_Numeros | Literales_Octales | Literales_Hexadecimal
 FUNCIONES ::= FUNCIONES FUNCION
     |
 ;
-FUNCION ::= Function Identificador Parentesis_A PARAMETROS Parentesis_B Dos_Puntos TIPO_RETORNO Corchete_A INSTRUCCIONES Corchete_B
+FUNCION ::= Function Identificador Parentesis_A PARAMETROS Parentesis_B Dos_Puntos TIPO_RETORNO BLOQUE
+    | Function error BLOQUE
 ;
 TIPO_RETORNO ::= TIPO | Void
 ;
@@ -91,26 +249,34 @@ LISTA_PARAMETROS ::= LISTA_PARAMETROS Coma PARAMETRO
 PARAMETRO ::= Identificador Dos_Puntos TIPO
 ;
 
-BLOQUE_MAIN ::= Main Corchete_A INSTRUCCIONES Corchete_B
+BLOQUE_MAIN ::= Main BLOQUE
+;
+BLOQUE ::= Corchete_A INSTRUCCIONES Corchete_B
+    | Corchete_A INSTRUCCIONES error Corchete_B
+    | error INSTRUCCIONES Corchete_B
 ;
 
 INSTRUCCIONES ::= INSTRUCCIONES INSTRUCCION
     |
 ;
 INSTRUCCION ::= DECLARACION
-    | ASIGNACION Punto_Coma
-    | INCREMENTO Punto_Coma
-    | LLAMADA Punto_Coma
-    | Print Parentesis_A LISTA_EXPRESIONES Parentesis_B Punto_Coma
-    | Read Parentesis_A Parentesis_B Punto_Coma
-    | Read Parentesis_A DESTINO Parentesis_B Punto_Coma
-    | Break Punto_Coma
-    | Continue Punto_Coma
-    | Return Punto_Coma
-    | Return EXPRESION Punto_Coma
+    | ASIGNACION PUNTO_COMA
+    | INCREMENTO PUNTO_COMA
+    | LLAMADA PUNTO_COMA
+    | Print Parentesis_A LISTA_EXPRESIONES Parentesis_B PUNTO_COMA
+    | Read Parentesis_A Parentesis_B PUNTO_COMA
+    | Read Parentesis_A DESTINO Parentesis_B PUNTO_COMA
+    | Break PUNTO_COMA
+    | Continue PUNTO_COMA
+    | Return PUNTO_COMA
+    | Return EXPRESION PUNTO_COMA
     | ESTRUCTURA_IF
     | ESTRUCTURA_WHILE
     | ESTRUCTURA_FOR
+    | error Punto_Coma
+;
+PUNTO_COMA ::= Punto_Coma
+    | error
 ;
 
 DESTINO ::= Identificador
@@ -130,13 +296,18 @@ LISTA_EXPRESIONES ::= LISTA_EXPRESIONES Coma EXPRESION
     | EXPRESION
 ;
 
-ESTRUCTURA_IF ::= If CONDICION Corchete_A INSTRUCCIONES Corchete_B
-    | If CONDICION Corchete_A INSTRUCCIONES Corchete_B Else Corchete_A INSTRUCCIONES Corchete_B
-    | If CONDICION Corchete_A INSTRUCCIONES Corchete_B Else ESTRUCTURA_IF
+ESTRUCTURA_IF ::= If CONDICION BLOQUE PARTE_ELSE
+    | If error BLOQUE PARTE_ELSE
 ;
-ESTRUCTURA_WHILE ::= While CONDICION Corchete_A INSTRUCCIONES Corchete_B
+PARTE_ELSE ::= Else BLOQUE
+    | Else ESTRUCTURA_IF
+    |
 ;
-ESTRUCTURA_FOR ::= For INICIALIZACION_FOR Punto_Coma CONDICION Punto_Coma ACTUALIZACION_FOR Corchete_A INSTRUCCIONES Corchete_B
+ESTRUCTURA_WHILE ::= While CONDICION BLOQUE
+    | While error BLOQUE
+;
+ESTRUCTURA_FOR ::= For INICIALIZACION_FOR Punto_Coma CONDICION Punto_Coma ACTUALIZACION_FOR BLOQUE
+    | For error BLOQUE
 ;
 INICIALIZACION_FOR ::= ASIGNACION
     | Var Identificador Dos_Puntos TIPO Igual EXPRESION

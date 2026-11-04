@@ -354,18 +354,11 @@ public class FrmPrincipal extends javax.swing.JFrame {
         String ST = txtEntrada.getText();
         LexerCup lexer = new LexerCup(new StringReader(ST));
         Sintax s = new Sintax(lexer);
-        List<String> erroresSintacticos = s.getErroresSintacticos();
 
         try {
             s.parse();
         } catch (Exception ex) {
-            Symbol simbolo = s.getS();
-            if (simbolo == null || simbolo.sym == sym.EOF) {
-                erroresSintacticos.add("Final del archivo: el programa termino antes de lo esperado");
-            } else {
-                erroresSintacticos.add("Linea " + simbolo.left + ", columna " + simbolo.right
-                        + ": error de sintaxis cerca de \"" + simbolo.value + "\"");
-            }
+            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         try {
@@ -379,7 +372,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
         resultado.append("=== Errores lexicos ===\n");
         agregarLista(resultado, lexer.erroresLexicos);
         resultado.append("\n=== Errores sintacticos ===\n");
-        agregarLista(resultado, erroresSintacticos);
+        agregarLista(resultado, s.getErroresSintacticos());
         txtResultadoSintactico.setText(resultado.toString());
     }//GEN-LAST:event_btnAnalizarSintacticoActionPerformed
 

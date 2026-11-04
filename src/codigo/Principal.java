@@ -18,7 +18,7 @@ public class Principal {
 public static void main(String[] args) throws IOException, Exception {
     String ruta1 = "src/codigo/Lexer.flex"; // ruta relativa a la raiz del proyecto NetBeans
     String ruta2 = "src/codigo/LexerCup.flex";
-    String[] rutaS = {"-parser", "Sintax", "src/codigo/Sintax.cup"};
+    String[] rutaS = {"-compact_red", "-parser", "Sintax", "src/codigo/Sintax.cup"};
     
     //File f = new File(ruta1);
     //System.out.println("Existe: " + f.exists());

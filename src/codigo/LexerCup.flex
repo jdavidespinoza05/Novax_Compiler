@@ -85,7 +85,7 @@ simboloInvalido=[^[:letter:][:digit:]_ \t\r\n+\-*/%=<>!,;()\[\]{}:.\"]
 {espacio} {/* ignorar espacios */}
 
 \"[^\"\r\n]*\"          {return symbol(sym.Literales_String);}
-\"[^\"\r\n;]*           {error("cadena sin cerrar " + recorte() + " (falta la comilla final)"); return symbol(sym.Literales_String);}
+\"[^\"\r\n;)]*          {error("cadena sin cerrar " + recorte() + " (falta la comilla final)"); return symbol(sym.Literales_String);}
 0[0-7]+                 {return symbol(sym.Literales_Octales);}
 0[0-9]+                 {error("octal invalido \"" + recorte() + "\" (solo se permiten digitos 0-7)"); return symbol(sym.Literales_Octales);}
 0[xX][0-9a-fA-F]+       {return symbol(sym.Literales_Hexadecimales);}
