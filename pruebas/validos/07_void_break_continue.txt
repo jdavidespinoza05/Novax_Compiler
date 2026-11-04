@@ -1,0 +1,18 @@
+program P {
+  function g(): void {
+    return;
+  }
+  function h(): string {
+    return "x";
+  }
+  main {
+    g();
+    while true {
+      if h() == "x" {
+        break;
+      } else {
+        continue;
+      }
+    }
+  }
+}

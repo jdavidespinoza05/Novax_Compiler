@@ -1,0 +1,7 @@
+program P {
+  main {
+    x = 1
+    y = ;
+    z = 3;
+  }
+}

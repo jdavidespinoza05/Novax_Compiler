@@ -1,0 +1,8 @@
+program P {
+  main {
+    for i = 0; i < 3; i++
+      print(i);
+    }
+    y = ;
+  }
+}

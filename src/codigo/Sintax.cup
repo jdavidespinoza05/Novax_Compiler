@@ -13,7 +13,6 @@ parser code
     private Symbol actual;
     private Symbol anterior;
     private Symbol anteAnterior;
-    private int ultimaLineaError = -1;
     private List<ErrorSintactico> errores = new ArrayList<>();
 
     private static class ErrorSintactico {
@@ -66,13 +65,14 @@ parser code
             mensaje = "se encontro " + encontrado + " pero se esperaba " + describir(esperados);
         }
 
-        if (linea != ultimaLineaError) {
-            errores.add(new ErrorSintactico(linea, mensaje));
-            ultimaLineaError = linea;
-        }
+        errores.add(new ErrorSintactico(linea, mensaje));
     }
 
     public void unrecovered_syntax_error(Symbol s){
+    }
+
+    protected int error_sync_size(){
+        return 2;
     }
 
     public Symbol getS(){
@@ -236,6 +236,7 @@ FUNCIONES ::= FUNCIONES FUNCION
     |
 ;
 FUNCION ::= Function Identificador Parentesis_A PARAMETROS Parentesis_B Dos_Puntos TIPO_RETORNO BLOQUE
+    | Function Identificador Parentesis_A PARAMETROS Parentesis_B Dos_Puntos TIPO_RETORNO error INSTRUCCIONES Corchete_B
     | Function error BLOQUE
 ;
 TIPO_RETORNO ::= TIPO | Void
@@ -250,10 +251,10 @@ PARAMETRO ::= Identificador Dos_Puntos TIPO
 ;
 
 BLOQUE_MAIN ::= Main BLOQUE
+    | Main error INSTRUCCIONES Corchete_B
 ;
 BLOQUE ::= Corchete_A INSTRUCCIONES Corchete_B
     | Corchete_A INSTRUCCIONES error Corchete_B
-    | error INSTRUCCIONES Corchete_B
 ;
 
 INSTRUCCIONES ::= INSTRUCCIONES INSTRUCCION
@@ -297,16 +298,20 @@ LISTA_EXPRESIONES ::= LISTA_EXPRESIONES Coma EXPRESION
 ;
 
 ESTRUCTURA_IF ::= If CONDICION BLOQUE PARTE_ELSE
+    | If CONDICION error INSTRUCCIONES Corchete_B PARTE_ELSE
     | If error BLOQUE PARTE_ELSE
 ;
 PARTE_ELSE ::= Else BLOQUE
     | Else ESTRUCTURA_IF
+    | Else error INSTRUCCION
     |
 ;
 ESTRUCTURA_WHILE ::= While CONDICION BLOQUE
+    | While CONDICION error INSTRUCCIONES Corchete_B
     | While error BLOQUE
 ;
 ESTRUCTURA_FOR ::= For INICIALIZACION_FOR Punto_Coma CONDICION Punto_Coma ACTUALIZACION_FOR BLOQUE
+    | For INICIALIZACION_FOR Punto_Coma CONDICION Punto_Coma ACTUALIZACION_FOR error INSTRUCCIONES Corchete_B
     | For error BLOQUE
 ;
 INICIALIZACION_FOR ::= ASIGNACION

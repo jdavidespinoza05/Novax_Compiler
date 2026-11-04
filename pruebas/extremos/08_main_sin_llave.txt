@@ -1,0 +1,5 @@
+program P {
+  main
+    x = 1;
+  }
+}

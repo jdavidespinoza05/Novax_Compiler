@@ -1,0 +1,12 @@
+program P {
+  var a: array[int, 0x10];
+  var b: array[float, 010];
+  const N: int = -5;
+  main {
+    a[0] = a[1] + b[N * 2];
+    a[2]++;
+    if not (a[0] > 1) or a[1] != 2 and true {
+      print(-a[0], - -3);
+    }
+  }
+}

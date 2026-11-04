@@ -1,0 +1,17 @@
+program P {
+  function f(a: int): int {
+    while a > 0 {
+      if a == 1 {
+        a = a +;
+      }
+    }
+    return a;
+  }
+  main {
+    print();
+    var k: int = f(2);
+    for k = 0; k < 3; k++ {
+      read(k, k);
+    }
+  }
+}

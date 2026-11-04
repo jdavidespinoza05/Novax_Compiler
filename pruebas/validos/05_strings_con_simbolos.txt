@@ -1,0 +1,7 @@
+program P {
+  main {
+    print("Hola mundo, 1 + 2 = 3");
+    print("con // dentro", "y /* esto */ tambien");
+    var s: string = "";
+  }
+}
