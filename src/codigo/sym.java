@@ -22,6 +22,7 @@ public class sym {
   public static final int Else = 14;
   public static final int Read = 22;
   public static final int Break = 23;
+  public static final int MENOS_UNARIO = 58;
   public static final int Mayor_Igual = 34;
   public static final int Mayor = 35;
   public static final int Literales_Flotantes = 56;
@@ -124,7 +125,8 @@ public class sym {
   "Literales_Octales",
   "Literales_Hexadecimales",
   "Literales_Flotantes",
-  "Literales_Numeros"
+  "Literales_Numeros",
+  "MENOS_UNARIO"
   };
 }
 

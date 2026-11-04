@@ -1,10 +1,13 @@
 package codigo;
 
 import java_cup.runtime.Symbol;
+import java.util.ArrayList;
+import java.util.List;
 
 parser code
 {:
     private Symbol s;
+    private List<String> erroresSintacticos = new ArrayList<>();
 
     public void syntax_error(Symbol s){
         this.s = s;
@@ -14,66 +17,162 @@ parser code
         return this.s;
     }
 
+    public List<String> getErroresSintacticos(){
+        return erroresSintacticos;
+    }
+
+    public void verificarCondicion(String tipo, int linea){
+        if (tipo.equals("parentesis")) {
+            erroresSintacticos.add("Linea " + linea + ": la condicion no va entre parentesis");
+        } else if (tipo.equals("noBooleana")) {
+            erroresSintacticos.add("Linea " + linea + ": la condicion debe ser una expresion booleana (comparacion, and, or, not, true o false)");
+        }
+    }
+
 :};
 
 terminal Int, Main, Program, Var, Const, Float, Bool, String, Array, Function, Return, If, Else, While,
- Do, For, And, Or, Not, Print, Read, Break, Continue, Void, True, False, Doble_Suma, Suma, Doble_Resta, 
+ Do, For, And, Or, Not, Print, Read, Break, Continue, Void, True, False, Doble_Suma, Suma, Doble_Resta,
 Resta, Doble_Igual, Igual, Mayor_Igual,  Mayor, Menor_Igual, Menor, Diferente, Multiplicacion, Division,
  Porcentaje, Coma, Punto_Coma, Parentesis_A, Parentesis_B, ParentesisC_A, ParentesisC_B, Corchete_A,
  Corchete_B, Dos_Puntos, Punto, Identificador, Literales_String,
   Literales_Octales, Literales_Hexadecimales, Literales_Flotantes,
  Literales_Numeros;
 
-non terminal INICIO, SENTENCIA, INSTRUCCIONES, DECLARACIONES, EXPRESION, VARIABLES_LOCALES_GLOBALES, 
-CONSTANTES, ARREGLOS, FUNCIONES, PARAMETROS, ASIGNACIONES, BREAK_CONTINUE, ESTRUCTURAS_CONTROL;
+terminal MENOS_UNARIO;
 
-INICIO ::= Int Main Parentesis_A Parentesis_B Corchete_A SENTENCIA Corchete_B
-        | Program Identificador Corchete_A SENTENCIA Corchete_B
+non terminal PROGRAMA, DECLARACIONES_GLOBALES, DECLARACION, TIPO, TAMANO_ARREGLO, FUNCIONES, FUNCION,
+ TIPO_RETORNO, PARAMETROS, LISTA_PARAMETROS, PARAMETRO, BLOQUE_MAIN, INSTRUCCIONES, INSTRUCCION,
+ DESTINO, ASIGNACION, INCREMENTO, LLAMADA, ARGUMENTOS, LISTA_EXPRESIONES, ESTRUCTURA_IF, ESTRUCTURA_WHILE,
+ ESTRUCTURA_FOR, INICIALIZACION_FOR, ACTUALIZACION_FOR, CONDICION;
+
+non terminal String EXPRESION, VALOR;
+
+precedence left Or;
+precedence left And;
+precedence right Not;
+precedence left Doble_Igual, Diferente;
+precedence left Menor, Mayor, Menor_Igual, Mayor_Igual;
+precedence left Suma, Resta;
+precedence left Multiplicacion, Division, Porcentaje;
+precedence right MENOS_UNARIO;
+
+start with PROGRAMA;
+
+PROGRAMA ::= Program Identificador Corchete_A DECLARACIONES_GLOBALES FUNCIONES BLOQUE_MAIN Corchete_B
 ;
-SENTENCIA ::= Int Identificador Punto_Coma | Int Identificador Igual Literales_Numeros Punto_Coma
+
+DECLARACIONES_GLOBALES ::= DECLARACIONES_GLOBALES DECLARACION
+    |
 ;
-INSTRUCCIONES ::= VARIABLES_LOCALES_GLOBALES | CONSTANTES | ARREGLOS | ASIGNACIONES | ESTRUCTURAS_CONTROL
+DECLARACION ::= Var Identificador Dos_Puntos TIPO Punto_Coma
+    | Var Identificador Dos_Puntos TIPO Igual EXPRESION Punto_Coma
+    | Var Identificador Dos_Puntos Array ParentesisC_A TIPO Coma TAMANO_ARREGLO ParentesisC_B Punto_Coma
+    | Const Identificador Dos_Puntos TIPO Igual EXPRESION Punto_Coma
 ;
-DECLARACIONES ::= VARIABLES_LOCALES_GLOBALES
+TIPO ::= Int | Float | Bool | String
 ;
-EXPRESION ::= VARIABLES_LOCALES_GLOBALES
+TAMANO_ARREGLO ::= Literales_Numeros | Literales_Octales | Literales_Hexadecimales | Identificador
 ;
-VARIABLES_LOCALES_GLOBALES ::= Var Identificador Dos_Puntos Int Punto_Coma
-    | Var Identificador Dos_Puntos Float Punto_Coma
-    | Var Identificador Dos_Puntos Bool Punto_Coma
-    | Var Identificador Dos_Puntos String Punto_Coma
-    | Var Identificador Dos_Puntos Int Igual Literales_Numeros Punto_Coma
-    | Var Identificador Dos_Puntos Float Igual Literales_Flotantes Punto_Coma
-    | Var Identificador Dos_Puntos Bool Igual True Punto_Coma
-    | Var Identificador Dos_Puntos Bool Igual False Punto_Coma
+
+FUNCIONES ::= FUNCIONES FUNCION
+    |
 ;
-CONSTANTES ::= Const Identificador Dos_Puntos Int Igual Literales_Numeros Punto_Coma
-    | Const Identificador Dos_Puntos Float Igual Literales_Flotantes Punto_Coma
-    | Const Identificador Dos_Puntos Bool Igual True Punto_Coma
-    | Const Identificador Dos_Puntos Bool Igual False Punto_Coma
-    | Const Identificador Dos_Puntos String Igual Literales_String Punto_Coma
+FUNCION ::= Function Identificador Parentesis_A PARAMETROS Parentesis_B Dos_Puntos TIPO_RETORNO Corchete_A INSTRUCCIONES Corchete_B
 ;
-ARREGLOS ::= Var Identificador Dos_Puntos Array ParentesisC_A Int Coma Literales_Numeros ParentesisC_B Punto_Coma
-| Var Identificador Dos_Puntos Array ParentesisC_A Float Coma Literales_Numeros ParentesisC_B Punto_Coma
-| Var Identificador Dos_Puntos Array ParentesisC_A String Coma Literales_Numeros ParentesisC_B Punto_Coma
-| Var Identificador Dos_Puntos Array ParentesisC_A Bool Coma Literales_Numeros ParentesisC_B Punto_Coma
+TIPO_RETORNO ::= TIPO | Void
 ;
-FUNCIONES ::= Function Identificador Parentesis_A PARAMETROS Parentesis_B Dos_Puntos Int Corchete_A DECLARACIONES INSTRUCCIONES Return EXPRESION Punto_Coma Corchete_A
-| Function Identificador Parentesis_A PARAMETROS Parentesis_B Dos_Puntos Float Corchete_A DECLARACIONES INSTRUCCIONES Return EXPRESION Punto_Coma Corchete_A
-| Function Identificador Parentesis_A PARAMETROS Parentesis_B Dos_Puntos String Corchete_A DECLARACIONES INSTRUCCIONES Return EXPRESION Punto_Coma Corchete_A
+PARAMETROS ::= LISTA_PARAMETROS
+    |
 ;
-PARAMETROS ::= Identificador Dos_Puntos Int
-    | Identificador Dos_Puntos Float
-    | Identificador Dos_Puntos Bool
-    | Identificador Dos_Puntos String
-    | Identificador Dos_Puntos Void
+LISTA_PARAMETROS ::= LISTA_PARAMETROS Coma PARAMETRO
+    | PARAMETRO
 ;
-ASIGNACIONES ::= Identificador Igual Punto_Coma
+PARAMETRO ::= Identificador Dos_Puntos TIPO
 ;
-BREAK_CONTINUE ::= Punto_Coma Break
-    | Punto_Coma Continue
+
+BLOQUE_MAIN ::= Main Corchete_A INSTRUCCIONES Corchete_B
 ;
-ESTRUCTURAS_CONTROL ::= If True Corchete_A INSTRUCCIONES Corchete_B Else Corchete_A INSTRUCCIONES Corchete_B
-| While True Corchete_A INSTRUCCIONES Corchete_B
-| For VARIABLES_LOCALES_GLOBALES True Punto_Coma VARIABLES_LOCALES_GLOBALES Corchete_A INSTRUCCIONES Corchete_B
+
+INSTRUCCIONES ::= INSTRUCCIONES INSTRUCCION
+    |
+;
+INSTRUCCION ::= DECLARACION
+    | ASIGNACION Punto_Coma
+    | INCREMENTO Punto_Coma
+    | LLAMADA Punto_Coma
+    | Print Parentesis_A LISTA_EXPRESIONES Parentesis_B Punto_Coma
+    | Read Parentesis_A Parentesis_B Punto_Coma
+    | Read Parentesis_A DESTINO Parentesis_B Punto_Coma
+    | Break Punto_Coma
+    | Continue Punto_Coma
+    | Return Punto_Coma
+    | Return EXPRESION Punto_Coma
+    | ESTRUCTURA_IF
+    | ESTRUCTURA_WHILE
+    | ESTRUCTURA_FOR
+;
+
+DESTINO ::= Identificador
+    | Identificador ParentesisC_A EXPRESION ParentesisC_B
+;
+ASIGNACION ::= DESTINO Igual EXPRESION
+;
+INCREMENTO ::= DESTINO Doble_Suma
+    | DESTINO Doble_Resta
+;
+LLAMADA ::= Identificador Parentesis_A ARGUMENTOS Parentesis_B
+;
+ARGUMENTOS ::= LISTA_EXPRESIONES
+    |
+;
+LISTA_EXPRESIONES ::= LISTA_EXPRESIONES Coma EXPRESION
+    | EXPRESION
+;
+
+ESTRUCTURA_IF ::= If CONDICION Corchete_A INSTRUCCIONES Corchete_B
+    | If CONDICION Corchete_A INSTRUCCIONES Corchete_B Else Corchete_A INSTRUCCIONES Corchete_B
+    | If CONDICION Corchete_A INSTRUCCIONES Corchete_B Else ESTRUCTURA_IF
+;
+ESTRUCTURA_WHILE ::= While CONDICION Corchete_A INSTRUCCIONES Corchete_B
+;
+ESTRUCTURA_FOR ::= For INICIALIZACION_FOR Punto_Coma CONDICION Punto_Coma ACTUALIZACION_FOR Corchete_A INSTRUCCIONES Corchete_B
+;
+INICIALIZACION_FOR ::= ASIGNACION
+    | Var Identificador Dos_Puntos TIPO Igual EXPRESION
+;
+ACTUALIZACION_FOR ::= ASIGNACION
+    | INCREMENTO
+;
+
+CONDICION ::= EXPRESION:e {: parser.verificarCondicion(e, eleft); :}
+;
+
+EXPRESION ::= EXPRESION Or EXPRESION {: RESULT = "booleana"; :}
+    | EXPRESION And EXPRESION {: RESULT = "booleana"; :}
+    | Not EXPRESION {: RESULT = "booleana"; :}
+    | EXPRESION Doble_Igual EXPRESION {: RESULT = "booleana"; :}
+    | EXPRESION Diferente EXPRESION {: RESULT = "booleana"; :}
+    | EXPRESION Menor EXPRESION {: RESULT = "booleana"; :}
+    | EXPRESION Mayor EXPRESION {: RESULT = "booleana"; :}
+    | EXPRESION Menor_Igual EXPRESION {: RESULT = "booleana"; :}
+    | EXPRESION Mayor_Igual EXPRESION {: RESULT = "booleana"; :}
+    | EXPRESION Suma EXPRESION {: RESULT = "noBooleana"; :}
+    | EXPRESION Resta EXPRESION {: RESULT = "noBooleana"; :}
+    | EXPRESION Multiplicacion EXPRESION {: RESULT = "noBooleana"; :}
+    | EXPRESION Division EXPRESION {: RESULT = "noBooleana"; :}
+    | EXPRESION Porcentaje EXPRESION {: RESULT = "noBooleana"; :}
+    | Resta EXPRESION {: RESULT = "noBooleana"; :} %prec MENOS_UNARIO
+    | Parentesis_A EXPRESION Parentesis_B {: RESULT = "parentesis"; :}
+    | VALOR:v {: RESULT = v; :}
+;
+VALOR ::= Literales_Numeros {: RESULT = "noBooleana"; :}
+    | Literales_Flotantes {: RESULT = "noBooleana"; :}
+    | Literales_Octales {: RESULT = "noBooleana"; :}
+    | Literales_Hexadecimales {: RESULT = "noBooleana"; :}
+    | Literales_String {: RESULT = "noBooleana"; :}
+    | True {: RESULT = "booleana"; :}
+    | False {: RESULT = "booleana"; :}
+    | DESTINO {: RESULT = "valor"; :}
+    | LLAMADA {: RESULT = "valor"; :}
 ;

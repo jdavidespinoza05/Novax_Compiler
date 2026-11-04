@@ -354,7 +354,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
         String ST = txtEntrada.getText();
         LexerCup lexer = new LexerCup(new StringReader(ST));
         Sintax s = new Sintax(lexer);
-        List<String> erroresSintacticos = new ArrayList<>();
+        List<String> erroresSintacticos = s.getErroresSintacticos();
 
         try {
             s.parse();
